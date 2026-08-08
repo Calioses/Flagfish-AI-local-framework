@@ -1,98 +1,70 @@
 ````markdown
-<!-- PROJECT SHIELDS -->
-<div align="center">
+# Discord RAG & Web Search Bot
+
+An intelligent Discord bot that performs local codebase Retrieval-Augmented Generation (RAG) and real-time web search summaries using ChromaDB, DuckDuckGo, and local Ollama LLMs.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-
-</div>
-
-<!-- PROJECT LOGO / HEADER -->
-<br />
-<div align="center">
-  <a href="https://github.com/your-username/your-repo-name">
-    <img src="https://via.placeholder.com/150" alt="Logo" width="80" height="80">
-  </a>
-
-  <h3 align="center">Project Name</h3>
-
-  <p align="center">
-    A short, punchy 1-2 sentence description of what this project does and the problem it solves.
-    <br />
-    <a href="https://github.com/your-username/your-repo-name"><strong>Explore the docs »</strong></a>
-    <br />
-    <br />
-    <a href="https://your-demo-url.com">View Demo</a>
-    ·
-    <a href="https://github.com/your-username/your-repo-name/issues">Report Bug</a>
-    ·
-    <a href="https://github.com/your-username/your-repo-name/issues">Request Feature</a>
-  </p>
-</div>
-
-<!-- TABLE OF CONTENTS -->
-<details>
-  <summary>Table of Contents</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">Getting Started</a>
-      <ul>
-        <li><a href="#prerequisites">Prerequisites</a></li>
-        <li><a href="#installation">Installation</a></li>
-      </ul>
-    </li>
-    <li><a href="#usage">Usage</a></li>
-    <li><a href="#roadmap">Roadmap</a></li>
-    <li><a href="#contributing">Contributing</a></li>
-    <li><a href="#license">License</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ol>
-</details>
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
+[![Discord.py](https://img.shields.io/badge/Discord.py-v2.0+-5865F2?style=flat&logo=discord&logoColor=white)](https://discordpy.readthedocs.io/)
+[![Ollama](https://img.shields.io/badge/Ollama-Supported-black?style=flat&logo=ollama&logoColor=white)](https://ollama.com)
 
 ---
 
-## About The Project
+## Table of Contents
 
-![Product Screenshot](https://via.placeholder.com/800x400?text=Product+Screenshot+or+GIF)
+- [About the Project](#about-the-project)
+- [Key Features](#key-features)
+- [Tech Stack](#tech-stack)
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+- [Configuration](#configuration)
+- [Usage](#usage)
+- [License](#license)
 
-Here is a detailed explanation of what your project does. Highlight the main features, why you built it, and what makes it special.
+---
 
-### Features
+## About the Project
 
-- 🚀 **Feature 1:** High-performance data processing
-- 🔐 **Feature 2:** Built-in authentication & security
-- 🎨 **Feature 3:** Clean, intuitive UI/UX
-- ⚡ **Feature 4:** Instant API response times
+This project turns your local codebase and web search capabilities into a Discord-accessible AI assistant. By indexing source files into a vector database (`ChromaDB`) using syntax-aware splitters and leveraging `Ollama` for local LLM inference, users can query codebases and live web results directly through native Discord slash commands.
 
-### Built With
+---
 
-List major frameworks and libraries used to build your project.
+## Key Features
 
-- [![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-- [![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)](https://reactjs.org/)
-- [![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+- 🔍 **Codebase RAG (`/query ask`):** Performs semantic search over local Git repositories and directory paths using `SentenceTransformers` (`all-MiniLM-L6-v2`) and injects relevant code context into local LLM prompts.
+- 🌐 **Web Search Summaries (`/query search`):** Scrapes top web results via DuckDuckGo and `BeautifulSoup`, summarizing fresh web context with Ollama.
+- 🗺️ **Sitemap Tracking:** Logs visited URLs and document state into a local SQLite database (`sitemap.db`) to keep track of referenced sources.
+- 🔄 **Incremental Indexing:** Computes SHA-256 file hashes to skip unmodified code files and automatically purges/re-indexes modified vectors.
+- ⏱️ **Automatic Git Synchronization:** Runs a background loop that monitors specified Git repositories and triggers automatic re-indexing upon `git pull` updates.
+- ✂️ **Chunking Safety:** Automatically splits large AI responses into 1,900-character sequential messages to comply with Discord's 2,000-character message limit.
+
+---
+
+## Tech Stack
+
+- **Language:** Python 3.10+
+- **Discord Integration:** `discord.py` (Slash Commands via `app_commands`)
+- **Vector Database:** ChromaDB
+- **Relational Database:** SQLite
+- **LLM Engine:** Ollama (`qwen2.5-coder:14b`)
+- **Embeddings & Text Splitting:** SentenceTransformers, LangChain Text Splitters
+- **Web Scraping & Search:** `duckduckgo-search`, `httpx`, `BeautifulSoup4`
 
 ---
 
 ## Getting Started
 
-Follow these steps to get a local copy up and running on your machine.
+Follow these instructions to run the bot locally on your machine.
 
 ### Prerequisites
 
-List software or tools needed before running the project:
-
-- **npm** or **pip** (depending on tech stack)
-  ```bash
-  npm install npm@latest -g
-  ```
+1. **Python 3.10+**
+2. **Git**
+3. **Ollama:** Installed and serving models locally (`http://localhost:11434`).
+   ```bash
+   ollama pull qwen2.5-coder:14b
+   ```
 ````
 
 ### Installation
@@ -100,208 +72,91 @@ List software or tools needed before running the project:
 1. **Clone the repository:**
 
 ```bash
-git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-cd your-repo-name
+git clone [https://github.com/your-username/discord-rag-bot.git](https://github.com/your-username/discord-rag-bot.git)
+cd discord-rag-bot
 
 ```
 
-2. **Install dependencies:**
+2. **Create and activate a virtual environment:**
 
 ```bash
-npm install
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 ```
 
-3. **Set up environment variables:**
-   Copy the example environment file and fill in your credentials:
+3. **Install required packages:**
 
 ```bash
-cp .env.example .env
-
-```
-
-4. **Run the development server:**
-
-```bash
-npm run dev
-
-```
-
----
-
-## Usage
-
-Provide examples and screenshots showing how to use the project.
-
-```python
-# Quick code snippet example
-from your_package import Client
-
-client = Client(api_key="your_api_key")
-response = client.do_something()
-print(response)
-
-```
-
-For more detailed guides, check out the [Documentation](https://www.google.com/search?q=https://github.com/your-username/your-repo-name/wiki).
-
----
-
-## Roadmap
-
-- [x] Initial release & core functionality
-- [x] User authentication system
-- [ ] Add dark mode support
-- [ ] Multi-language support (i18n)
-
-See the [open issues](https://www.google.com/url?sa=E&source=gmail&q=https://github.com/your-username/your-repo-name/issues) for a full list of proposed features and known bugs.
-
----
-
-## Contributing
-
-Contributions are what make the open-source community an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**!
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the# Project Title
-
-A concise, one-line summary of what this project does and who it is for.
-
----
-
-## Table of Contents
-
-- [About the Project](https://www.google.com/search?q=%23about-the-project)
-- [Features](https://www.google.com/search?q=%23features)
-- [Tech Stack](https://www.google.com/search?q=%23tech-stack)
-- [Getting Started](https://www.google.com/search?q=%23getting-started)
-- [Prerequisites](https://www.google.com/search?q=%23prerequisites)
-- [Installation](https://www.google.com/search?q=%23installation)
-
-- [Usage](https://www.google.com/search?q=%23usage)
-- [Roadmap](https://www.google.com/search?q=%23roadmap)
-- [Contributing](https://www.google.com/search?q=%23contributing)
-- [License](https://www.google.com/search?q=%23license)
-- [Contact](https://www.google.com/search?q=%23contact)
-
----
-
-## About the Project
-
-Provide a brief overview of your project here. Explain the problem it solves, why you built it, and how it works at a high level.
-
-```
-[Optional: Insert a GIF, screenshot, or architecture diagram here]
-
-```
-
----
-
-## Features
-
-- **Feature 1:** Clear description of key functionality.
-- **Feature 2:** Highlight speed, reliability, or specific capabilities.
-- **Feature 3:** Mention integrations or supported platforms.
-
----
-
-## Tech Stack
-
-- **Language:** Python / TypeScript / Go
-- **Framework:** React / FastAPI / Express
-- **Database:** PostgreSQL / Redis
-- **DevOps:** Docker / GitHub Actions
-
----
-
-## Getting Started
-
-Follow these steps to get a local copy up and running.
-
-### Prerequisites
-
-List any tools, software, or API keys required before running the project:
-
-- Python 3.10+ or Node.js 18+
-- Git
-
-### Installation
-
-1. **Clone the repository**
-
-```bash
-git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
-cd your-repo-name
-
-```
-
-2. **Install dependencies**
-
-```bash
-# For Node.js projects
-npm install
-
-# OR for Python projects
 pip install -r requirements.txt
 
 ```
 
-3. **Set up environment variables**
+---
 
-```bash
-cp .env.example .env
-# Update .env with your specific environment keys
+## Configuration
 
-```
+Create a `config.yaml` file in the root directory:
 
-4. **Run the project**
+```yaml
+discord_tokens:
+  - 'YOUR_DISCORD_BOT_TOKEN'
 
-```bash
-npm start
-# OR
-python main.py
+git_repos:
+  - '/path/to/your/git/repository'
 
+local_paths:
+  - '/path/to/your/local/codebase'
+
+indexed_extensions:
+  - '.py'
+  - '.go'
+  - '.sql'
+  - '.md'
+  - '.txt'
+  - '.json'
+  - '.cpp'
+  - '.h'
+
+ignored_directories:
+  - '.git'
+  - '__pycache__'
+  - 'node_modules'
+  - '.venv'
+
+sync_interval: 60
+
+ollama:
+  url: 'http://localhost:11434/api/generate'
+  model: 'qwen2.5-coder:14b'
+
+chroma_path: './chroma_db'
+sqlite_path: './sitemap.db'
+embedding_model: 'all-MiniLM-L6-v2'
 ```
 
 ---
 
 ## Usage
 
-Provide quick examples of how to use your project.
+1. **Start the application:**
 
 ```bash
-# Example CLI command or API request
-my-cli-tool --input example.txt --output result.json
+python main.py
 
 ```
 
-```python
-# Example code snippet
-import my_package
+2. **Available Slash Commands in Discord:**
 
-result = my_package.run(option=True)
-print(result)
+- `/query ask query:<question>` – Queries local codebase context indexed in ChromaDB.
+- `/query search query:<search_term>` – Fetches live web results via DuckDuckGo and summarizes the findings.
+
+---
+
+## License
+
+Distributed under the MIT License. See `LICENSE` for details.
 
 ```
 
----
-
-## Roadmap
-
-- [x] Initial release
-- [ ] Add user authentication
-- [ ] Implement export to PDF
-- [ ] Multi-language support
-
----
-
-## Contributing
-
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1. Fork the Project
-2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the Branch (`git push origin featureNormally I can help with things like this, but I don't seem to have access to that content. You can try again or ask me for something else.
+```
