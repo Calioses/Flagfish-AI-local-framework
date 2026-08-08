@@ -14,11 +14,9 @@ from duckduckgo_search import DDGS
 from bs4 import BeautifulSoup
 from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
-
 def load_config(path="config.yaml"):
-    with open(path, "r", encoding="utf-8") as f:
-        return yaml.safe_load(f)
-
+with open(path, "r", encoding="utf-8") as f:
+return yaml.safe_load(f)
 
 config = load_config()
 
@@ -26,9 +24,9 @@ DISCORD_TOKENS = config.get("discord_tokens", [])
 GIT_REPOS = config.get("git_repos", [])
 LOCAL_PATHS = config.get("local_paths", [])
 INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
-                           ".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h"]))
+".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h"]))
 IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
-                          ".git", "__pycache__", "node_modules", ".venv"]))
+".git", "__pycache__", "node_modules", ".venv"]))
 SYNC_INTERVAL = int(config.get("sync_interval", 60))
 OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/generate")
 OLLAMA_MODEL = config["ollama"].get("model", "qwen2.5-coder:14b")
@@ -42,59 +40,56 @@ embedder = SentenceTransformer(EMBEDDING_MODEL, device="cpu")
 
 db_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
 db_conn.execute(
-    "CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)")
+"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)")
 db_conn.execute(
-    "CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)")
+"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)")
 db_conn.commit()
 
 # Extension to LangChain language mapping
+
 EXTENSION_LANG_MAP = {
-    ".py": Language.PYTHON,
-    ".go": Language.GO,
-    ".cpp": Language.CPP,
-    ".h": Language.CPP,
-    ".js": Language.JS,
-    ".ts": Language.TS,
-    ".rs": Language.RUST,
-    ".html": Language.HTML,
-    ".md": Language.MARKDOWN,
+".py": Language.PYTHON,
+".go": Language.GO,
+".cpp": Language.CPP,
+".h": Language.CPP,
+".js": Language.JS,
+".ts": Language.TS,
+".rs": Language.RUST,
+".html": Language.HTML,
+".md": Language.MARKDOWN,
 }
 
-
 def get_file_hash(file_path: str) -> str:
-    hasher = hashlib.sha256()
-    with open(file_path, "rb") as f:
-        while chunk := f.read(8192):
-            hasher.update(chunk)
-    return hasher.hexdigest()
-
+hasher = hashlib.sha256()
+with open(file_path, "rb") as f:
+while chunk := f.read(8192):
+hasher.update(chunk)
+return hasher.hexdigest()
 
 def get_splitter_for_file(file_path: str):
-    ext = os.path.splitext(file_path)[1].lower()
-    if ext in EXTENSION_LANG_MAP:
-        return RecursiveCharacterTextSplitter.from_language(
-            language=EXTENSION_LANG_MAP[ext], chunk_size=1000, chunk_overlap=100
-        )
-    return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
-
+ext = os.path.splitext(file_path)[1].lower()
+if ext in EXTENSION_LANG_MAP:
+return RecursiveCharacterTextSplitter.from_language(
+language=EXTENSION_LANG_MAP[ext], chunk_size=1000, chunk_overlap=100
+)
+return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 
 async def git_sync_loop():
-    while True:
-        await asyncio.sleep(SYNC_INTERVAL)
-        updated = False
-        for repo_path in GIT_REPOS:
-            if os.path.exists(repo_path):
-                res = subprocess.run(
-                    ["git", "-C", repo_path, "pull"], capture_output=True, text=True)
-                if "Already up to date." not in res.stdout:
-                    updated = True
-        if updated:
-            reindex_all()
-
+while True:
+await asyncio.sleep(SYNC_INTERVAL)
+updated = False
+for repo_path in GIT_REPOS:
+if os.path.exists(repo_path):
+res = subprocess.run(
+["git", "-C", repo_path, "pull"], capture_output=True, text=True)
+if "Already up to date." not in res.stdout:
+updated = True
+if updated:
+reindex_all()
 
 def process_target_path(target_path, docs, ids, metadatas):
-    if not os.path.exists(target_path):
-        return
+if not os.path.exists(target_path):
+return
 
     def parse_file(file_path):
         if not file_path.endswith(INDEXED_EXTENSIONS):
@@ -141,9 +136,8 @@ def process_target_path(target_path, docs, ids, metadatas):
             for file in files:
                 parse_file(os.path.join(root, file))
 
-
 def reindex_all():
-    docs, ids, metadatas = [], [], []
+docs, ids, metadatas = [], [], []
 
     for repo_path in GIT_REPOS:
         process_target_path(repo_path, docs, ids, metadatas)
@@ -163,9 +157,8 @@ def reindex_all():
             collection.add(documents=batch_docs, embeddings=embeddings,
                            ids=batch_ids, metadatas=batch_meta)
 
-
 async def search_and_store(query: str) -> str:
-    loop = asyncio.get_running_loop()
+loop = asyncio.get_running_loop()
 
     def sync_search():
         with DDGS() as ddgs:
@@ -197,26 +190,23 @@ async def search_and_store(query: str) -> str:
 
     return "\n".join(web_texts)
 
-
 async def send_large_interaction_message(interaction: discord.Interaction, text: str):
-    chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)]
-    if not chunks:
-        await interaction.followup.send("No response generated.")
-        return
+chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)]
+if not chunks:
+await interaction.followup.send("No response generated.")
+return
 
     await interaction.followup.send(chunks[0])
     for chunk in chunks[1:]:
         await interaction.followup.send(chunk)
 
-
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
 
-
 class QueryGroup(app_commands.Group):
-    def __init__(self):
-        super().__init__(name="query", description="Query local codebase or web")
+def **init**(self):
+super().**init**(name="query", description="Query local codebase or web")
 
     @app_commands.command(name="ask", description="Query local codebase context")
     @app_commands.describe(query="Your question about the codebase")
@@ -231,12 +221,8 @@ class QueryGroup(app_commands.Group):
 
             payload = {
                 "model": OLLAMA_MODEL,
-                "prompt": f"Instructions: Keep your answer detailed yet concise, under 8,000 characters total. Use Orwells rules for writing\n\nContext:\n{context}\n\nQuestion:\n{query}",
-                "stream": False,
-                "options": {
-                    # Limits maximum generated response length (~10,000 chars)
-                    "num_predict": 2000
-                }
+                "prompt": f"Context:\n{context}\n\nQuestion:\n{query}",
+                "stream": False
             }
 
             async with httpx.AsyncClient(timeout=120.0) as client:
@@ -270,16 +256,14 @@ class QueryGroup(app_commands.Group):
         except Exception as e:
             await interaction.followup.send(f"Error processing search request: {str(e)}")
 
-
 bot.tree.add_command(QueryGroup())
-
 
 @bot.event
 async def on_ready():
-    reindex_all()
-    await bot.tree.sync()
-    bot.loop.create_task(git_sync_loop())
+reindex_all()
+await bot.tree.sync()
+bot.loop.create_task(git_sync_loop())
 
-if __name__ == "__main__":
-    if DISCORD_TOKENS:
-        bot.run(DISCORD_TOKENS[0])
+if **name** == "**main**":
+if DISCORD_TOKENS:
+bot.run(DISCORD_TOKENS[0])
