@@ -195,7 +195,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "config = load_config()\nDISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")",
+        "peekOfCode": "config = load_config()\nDISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")",
         "detail": "main",
         "documentation": {}
     },
@@ -204,7 +204,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "DISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")",
+        "peekOfCode": "DISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")",
         "detail": "main",
         "documentation": {}
     },
@@ -213,7 +213,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "GIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")",
+        "peekOfCode": "GIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")",
         "detail": "main",
         "documentation": {}
     },
@@ -222,7 +222,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "LOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")",
+        "peekOfCode": "LOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")",
         "detail": "main",
         "documentation": {}
     },
@@ -231,7 +231,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "INDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")",
+        "peekOfCode": "INDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")",
         "detail": "main",
         "documentation": {}
     },
@@ -240,7 +240,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "IGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")",
+        "peekOfCode": "IGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")",
         "detail": "main",
         "documentation": {}
     },
@@ -249,7 +249,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "SYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)",
+        "peekOfCode": "SYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)",
         "detail": "main",
         "documentation": {}
     },
@@ -258,7 +258,7 @@
         "kind": 5,
         "importPath": "main",
         "description": "main",
-        "peekOfCode": "OLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(",
+        "peekOfCode": "OLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/chat\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(",
         "detail": "main",
         "documentation": {}
     },
@@ -340,6 +340,15 @@
         "importPath": "main",
         "description": "main",
         "peekOfCode": "EXTENSION_LANG_MAP = {\n    \".py\": Language.PYTHON,\n    \".go\": Language.GO,\n    \".cpp\": Language.CPP,\n    \".h\": Language.CPP,\n    \".js\": Language.JS,\n    \".ts\": Language.TS,\n    \".rs\": Language.RUST,\n    \".html\": Language.HTML,\n    \".md\": Language.MARKDOWN,",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "SEARCH_TOOL_DEFINITION",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "SEARCH_TOOL_DEFINITION = {\n    \"type\": \"function\",\n    \"function\": {\n        \"name\": \"duckduckgo_search\",\n        \"description\": \"Searches the web using DuckDuckGo to retrieve up-to-date information, external documentation, or real-time web content.\",\n        \"parameters\": {\n            \"type\": \"object\",\n            \"properties\": {\n                \"query\": {\n                    \"type\": \"string\",",
         "detail": "main",
         "documentation": {}
     },

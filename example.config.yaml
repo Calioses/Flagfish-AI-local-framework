@@ -1,8 +1,3 @@
-# ==========================================
-# RAG Server Configuration Template
-# Rename this file to config.yaml before running
-# ==========================================
-
 sync_interval: 60
 chroma_path: './chroma_db'
 sqlite_path: './sitemap.db'
@@ -36,7 +31,7 @@ ignored_directories:
   - '.vscode'
 
 ollama:
-  url: 'http://localhost:11434/api/generate'
+  url: 'http://localhost:11434/api/chat'
   model: 'qwen3.5-coder:b'
 
 discord_tokens:
