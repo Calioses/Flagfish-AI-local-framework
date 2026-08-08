@@ -30,7 +30,7 @@ INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
 IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
                           ".git", "__pycache__", "node_modules", ".venv"]))
 SYNC_INTERVAL = int(config.get("sync_interval", 60))
-OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/generate")
+OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/chat")
 OLLAMA_MODEL = config["ollama"].get("model", "qwen3.5-coder:b")
 CHROMA_PATH = config.get("chroma_path", "./chroma_db")
 SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
@@ -58,6 +58,24 @@ EXTENSION_LANG_MAP = {
     ".rs": Language.RUST,
     ".html": Language.HTML,
     ".md": Language.MARKDOWN,
+}
+
+SEARCH_TOOL_DEFINITION = {
+    "type": "function",
+    "function": {
+        "name": "duckduckgo_search",
+        "description": "Searches the web using DuckDuckGo to retrieve up-to-date information, external documentation, or real-time web content.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "The search query term to look up on the web."
+                }
+            },
+            "required": ["query"]
+        }
+    }
 }
 
 
@@ -198,6 +216,43 @@ async def search_and_store(query: str) -> str:
     return "\n".join(web_texts)
 
 
+async def query_ollama_with_tools(messages: list, allow_tools: bool = True) -> str:
+    payload = {
+        "model": OLLAMA_MODEL,
+        "messages": messages,
+        "stream": False,
+        "options": {
+            "num_predict": 2000
+        }
+    }
+    if allow_tools:
+        payload["tools"] = [SEARCH_TOOL_DEFINITION]
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        resp = await client.post(OLLAMA_URL, json=payload)
+        response_data = resp.json()
+        message = response_data.get("message", {})
+
+        tool_calls = message.get("tool_calls")
+        if tool_calls and allow_tools:
+            messages.append(message)
+            for tool_call in tool_calls:
+                func_name = tool_call.get("function", {}).get("name")
+                arguments = tool_call.get("function", {}).get("arguments", {})
+
+                if func_name == "duckduckgo_search":
+                    search_query = arguments.get("query", "")
+                    web_results = await search_and_store(search_query)
+                    messages.append({
+                        "role": "tool",
+                        "content": web_results if web_results else "No web results found."
+                    })
+
+            return await query_ollama_with_tools(messages, allow_tools=False)
+
+        return message.get("content", "No response generated.")
+
+
 async def send_large_interaction_message(interaction: discord.Interaction, text: str):
     chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)]
     if not chunks:
@@ -229,22 +284,19 @@ class QueryGroup(app_commands.Group):
             context = "\n".join(
                 results["documents"][0]) if results["documents"] and results["documents"][0] else ""
 
-            payload = {
-                "model": OLLAMA_MODEL,
-                "prompt": f"Instructions: Keep your answer detailed yet concise, under 8,000 characters total. Use Orwells rules for writing\n\nContext:\n{context}\n\nQuestion:\n{query}",
-                "stream": False,
-                "options": {
-                    # Limits maximum generated response length (~10,000 chars)
-                    "num_predict": 2000
+            messages = [
+                {
+                    "role": "system",
+                    "content": "Keep your answer detailed yet concise, under 8,000 characters total. Use Orwell's rules for writing. If the provided local codebase context is insufficient to answer the question, you may use the duckduckgo_search tool to look up information on the web."
+                },
+                {
+                    "role": "user",
+                    "content": f"Context:\n{context}\n\nQuestion:\n{query}"
                 }
-            }
+            ]
 
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(OLLAMA_URL, json=payload)
-                data = resp.json()
-
-            await send_large_interaction_message(
-                interaction, data.get("response", "No response generated."))
+            response_text = await query_ollama_with_tools(messages, allow_tools=True)
+            await send_large_interaction_message(interaction, response_text)
         except Exception as e:
             await interaction.followup.send(f"Error processing request: {str(e)}")
 
@@ -255,18 +307,15 @@ class QueryGroup(app_commands.Group):
         try:
             web_context = await search_and_store(query)
 
-            payload = {
-                "model": OLLAMA_MODEL,
-                "prompt": f"Web Context:\n{web_context}\n\nQuestion:\n{query}",
-                "stream": False
-            }
+            messages = [
+                {
+                    "role": "user",
+                    "content": f"Web Context:\n{web_context}\n\nQuestion:\n{query}"
+                }
+            ]
 
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                resp = await client.post(OLLAMA_URL, json=payload)
-                data = resp.json()
-
-            await send_large_interaction_message(
-                interaction, data.get("response", "No response generated."))
+            response_text = await query_ollama_with_tools(messages, allow_tools=False)
+            await send_large_interaction_message(interaction, response_text)
         except Exception as e:
             await interaction.followup.send(f"Error processing search request: {str(e)}")
 
