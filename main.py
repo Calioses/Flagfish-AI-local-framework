@@ -2,6 +2,7 @@ import os
 import sqlite3
 import subprocess
 import asyncio
+import hashlib
 import discord
 from discord.ext import commands
 import chromadb
@@ -10,7 +11,7 @@ import httpx
 import yaml
 from duckduckgo_search import DDGS
 from bs4 import BeautifulSoup
-from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
 
 
 def load_config(path="config.yaml"):
@@ -21,6 +22,7 @@ def load_config(path="config.yaml"):
 config = load_config()
 
 DISCORD_TOKENS = config.get("discord_tokens", [])
+ALLOWED_USERS = set(config.get("allowed_user_ids", []))
 GIT_REPOS = config.get("git_repos", [])
 LOCAL_PATHS = config.get("local_paths", [])
 INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
@@ -40,8 +42,40 @@ embedder = SentenceTransformer(EMBEDDING_MODEL, device="cpu")
 
 db_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
 db_conn.execute(
-    "CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)"
-)
+    "CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)")
+db_conn.execute(
+    "CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)")
+db_conn.commit()
+
+# Extension to LangChain language mapping
+EXTENSION_LANG_MAP = {
+    ".py": Language.PYTHON,
+    ".go": Language.GO,
+    ".cpp": Language.CPP,
+    ".h": Language.CPP,
+    ".js": Language.JS,
+    ".ts": Language.TS,
+    ".rs": Language.RUST,
+    ".html": Language.HTML,
+    ".md": Language.MARKDOWN,
+}
+
+
+def get_file_hash(file_path: str) -> str:
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        while chunk := f.read(8192):
+            hasher.update(chunk)
+    return hasher.hexdigest()
+
+
+def get_splitter_for_file(file_path: str):
+    ext = os.path.splitext(file_path)[1].lower()
+    if ext in EXTENSION_LANG_MAP:
+        return RecursiveCharacterTextSplitter.from_language(
+            language=EXTENSION_LANG_MAP[ext], chunk_size=1000, chunk_overlap=100
+        )
+    return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
 
 
 async def git_sync_loop():
@@ -58,54 +92,76 @@ async def git_sync_loop():
             reindex_all()
 
 
-def process_target_path(target_path, splitter, docs, ids, metadatas):
+def process_target_path(target_path, docs, ids, metadatas):
     if not os.path.exists(target_path):
         return
 
     def parse_file(file_path):
-        if file_path.endswith(INDEXED_EXTENSIONS):
-            try:
-                with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-                    content = f.read()
-                chunks = splitter.split_text(content)
-                for i, chunk in enumerate(chunks):
-                    docs.append(chunk)
-                    ids.append(f"{file_path}:{i}")
-                    metadatas.append({"source": "local", "path": file_path})
-            except Exception:
-                pass
+        if not file_path.endswith(INDEXED_EXTENSIONS):
+            return
+
+        current_hash = get_file_hash(file_path)
+        cursor = db_conn.cursor()
+        cursor.execute(
+            "SELECT hash FROM file_hashes WHERE path = ?", (file_path,))
+        row = cursor.fetchone()
+
+        # Skip unchanged files
+        if row and row[0] == current_hash:
+            return
+
+        try:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                content = f.read()
+
+            splitter = get_splitter_for_file(file_path)
+            chunks = splitter.split_text(content)
+
+            # Purge old vectors for this specific modified file before adding new ones
+            existing = collection.get(where={"path": file_path})
+            if existing and existing["ids"]:
+                collection.delete(ids=existing["ids"])
+
+            for i, chunk in enumerate(chunks):
+                docs.append(chunk)
+                ids.append(f"{file_path}:{i}")
+                metadatas.append({"source": "local", "path": file_path})
+
+            cursor.execute(
+                "INSERT OR REPLACE INTO file_hashes (path, hash) VALUES (?, ?)", (file_path, current_hash))
+            db_conn.commit()
+        except Exception:
+            pass
 
     if os.path.isfile(target_path):
         parse_file(target_path)
     elif os.path.isdir(target_path):
         for root, dirs, files in os.walk(target_path):
-            # Prune ignored directories in-place so os.walk skips descending into them
             dirs[:] = [d for d in dirs if d not in IGNORED_DIRECTORIES]
-
             for file in files:
                 parse_file(os.path.join(root, file))
 
 
 def reindex_all():
-    existing = collection.get(where={"source": "local"})
-    if existing and existing["ids"]:
-        collection.delete(ids=existing["ids"])
-
-    splitter = RecursiveCharacterTextSplitter.from_language(
-        language="python", chunk_size=1000, chunk_overlap=100
-    )
     docs, ids, metadatas = [], [], []
 
     for repo_path in GIT_REPOS:
-        process_target_path(repo_path, splitter, docs, ids, metadatas)
+        process_target_path(repo_path, docs, ids, metadatas)
 
     for path in LOCAL_PATHS:
-        process_target_path(path, splitter, docs, ids, metadatas)
+        process_target_path(path, docs, ids, metadatas)
 
+    # Batch inserts to avoid ChromaDB batch limits
+    BATCH_SIZE = 500
     if docs:
-        embeddings = embedder.encode(docs).tolist()
-        collection.add(documents=docs, embeddings=embeddings,
-                       ids=ids, metadatas=metadatas)
+        for i in range(0, len(docs), BATCH_SIZE):
+            batch_docs = docs[i:i + BATCH_SIZE]
+            batch_ids = ids[i:i + BATCH_SIZE]
+            batch_meta = metadatas[i:i + BATCH_SIZE]
+
+            embeddings = embedder.encode(batch_docs).tolist()
+            collection.add(documents=batch_docs, embeddings=embeddings,
+                           ids=batch_ids, metadatas=batch_meta)
 
 
 async def search_and_store(query: str) -> str:
@@ -127,9 +183,7 @@ async def search_and_store(query: str) -> str:
                 continue
 
             db_conn.execute(
-                "INSERT OR IGNORE INTO visited_urls (url, title) VALUES (?, ?)",
-                (url, title)
-            )
+                "INSERT OR IGNORE INTO visited_urls (url, title) VALUES (?, ?)", (url, title))
             db_conn.commit()
 
             try:
@@ -155,39 +209,48 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @bot.command(name="ask")
 async def ask(ctx, *, query: str):
-    query_emb = embedder.encode(query).tolist()
-    results = collection.query(query_embeddings=[query_emb], n_results=3)
-    context = "\n".join(
-        results["documents"][0]) if results["documents"] and results["documents"][0] else ""
+    async with ctx.typing():
+        try:
+            query_emb = embedder.encode(query).tolist()
+            results = collection.query(
+                query_embeddings=[query_emb], n_results=3)
+            context = "\n".join(
+                results["documents"][0]) if results["documents"] and results["documents"][0] else ""
 
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": f"Context:\n{context}\n\nQuestion:\n{query}",
-        "stream": False
-    }
+            payload = {
+                "model": OLLAMA_MODEL,
+                "prompt": f"Context:\n{context}\n\nQuestion:\n{query}",
+                "stream": False
+            }
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        resp = await client.post(OLLAMA_URL, json=payload)
-        data = resp.json()
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(OLLAMA_URL, json=payload)
+                data = resp.json()
 
-    await send_large_message(ctx, data.get("response", "No response generated."))
+            await send_large_message(ctx, data.get("response", "No response generated."))
+        except Exception as e:
+            await ctx.send(f"Error processing request: {str(e)}")
 
 
 @bot.command(name="search")
 async def search(ctx, *, query: str):
-    web_context = await search_and_store(query)
+    async with ctx.typing():
+        try:
+            web_context = await search_and_store(query)
 
-    payload = {
-        "model": OLLAMA_MODEL,
-        "prompt": f"Web Context:\n{web_context}\n\nQuestion:\n{query}",
-        "stream": False
-    }
+            payload = {
+                "model": OLLAMA_MODEL,
+                "prompt": f"Web Context:\n{web_context}\n\nQuestion:\n{query}",
+                "stream": False
+            }
 
-    async with httpx.AsyncClient(timeout=120.0) as client:
-        resp = await client.post(OLLAMA_URL, json=payload)
-        data = resp.json()
+            async with httpx.AsyncClient(timeout=120.0) as client:
+                resp = await client.post(OLLAMA_URL, json=payload)
+                data = resp.json()
 
-    await send_large_message(ctx, data.get("response", "No response generated."))
+            await send_large_message(ctx, data.get("response", "No response generated."))
+        except Exception as e:
+            await ctx.send(f"Error processing search request: {str(e)}")
 
 
 @bot.event
