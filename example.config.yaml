@@ -1,0 +1,38 @@
+# ==========================================
+# RAG Server Configuration Template
+# Rename this file to config.yaml before running
+# ==========================================
+
+sync_interval: 60
+chroma_path: './chroma_db'
+sqlite_path: './sitemap.db'
+embedding_model: 'all-MiniLM-L6-v2'
+
+ollama:
+  url: 'http://localhost:11434/api/generate'
+  model: 'qwen2.5-coder:14b'
+
+# List all Discord bot tokens to run concurrently
+discord_tokens:
+  - 'YOUR_DISCORD_BOT_TOKEN_1'
+  - 'YOUR_DISCORD_BOT_TOKEN_2'
+
+# List local directories to index and watch for git sync
+repo_paths:
+  - '/path/to/repo_1'
+  - '/path/to/repo_2'
+
+# File extensions to index during folder traversals
+indexed_extensions:
+  - '.py'
+  - '.go'
+  - '.sql'
+  - '.md'
+  - '.txt'
+  - '.json'
+  - '.cpp'
+  - '.h'
+  - '.c'
+  - '.rs'
+  - '.ts'
+  - '.js'
