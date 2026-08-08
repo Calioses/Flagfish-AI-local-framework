@@ -1,4 +1,3 @@
-````markdown
 # Discord RAG & Web Search Bot
 
 An intelligent Discord bot that performs local codebase Retrieval-Augmented Generation (RAG) and real-time web search summaries using ChromaDB, DuckDuckGo, and local Ollama LLMs.
@@ -65,6 +64,7 @@ Follow these instructions to run the bot locally on your machine.
    ```bash
    ollama pull qwen2.5-coder:14b
    ```
+
 ````
 
 ### Installation
@@ -156,7 +156,4 @@ python main.py
 ## License
 
 Distributed under the MIT License. See `LICENSE` for details.
-
-```
-
-```
+````
