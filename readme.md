@@ -2,11 +2,6 @@
 
 An intelligent Discord bot that performs local codebase Retrieval-Augmented Generation (RAG) and real-time web search summaries using ChromaDB, DuckDuckGo, and local Ollama LLMs.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org)
-[![Discord.py](https://img.shields.io/badge/Discord.py-v2.0+-5865F2?style=flat&logo=discord&logoColor=white)](https://discordpy.readthedocs.io/)
-[![Ollama](https://img.shields.io/badge/Ollama-Supported-black?style=flat&logo=ollama&logoColor=white)](https://ollama.com)
-
 ---
 
 ## Table of Contents
@@ -16,12 +11,11 @@ An intelligent Discord bot that performs local codebase Retrieval-Augmented Gene
 - [Tech Stack](#tech-stack)
 - [Getting Started](#getting-started)
   - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
+  - [Quick Setup](#quick-setup)
 - [Configuration](#configuration)
+- [Launch](#launch)
 - [Usage](#usage)
 - [License](#license)
-
----
 
 ## About the Project
 
@@ -54,41 +48,41 @@ This project turns your local codebase and web search capabilities into a Discor
 
 ## Getting Started
 
-Follow these instructions to run the bot locally on your machine.
-
 ### Prerequisites
 
-1. **Python 3.10+**
-2. **Git**
-3. **Ollama:** Installed and serving models locally (`http://localhost:11434`).
-   ```bash
-   ollama pull qwen3.5-coder:b
-   ```
+- **Python 3.10+**
+- **Git**
+- **Ollama** installed and running locally
 
-````
+### Quick Setup
 
-### Installation
-
-1. **Clone the repository:**
+1. **Clone repository & enter directory:**
 
 ```bash
-git clone [https://github.com/your-username/discord-rag-bot.git](https://github.com/your-username/discord-rag-bot.git)
+git clone https://github.com/your-username/discord-rag-bot.git
 cd discord-rag-bot
 
 ```
 
-2. **Create and activate a virtual environment:**
+2. **Create and activate virtual environment:**
 
 ```bash
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
 ```
 
-3. **Install required packages:**
+3. **Install dependencies:**
 
 ```bash
 pip install -r requirements.txt
+
+```
+
+4. **Pull target model in Ollama:**
+
+```bash
+ollama pull qwen3.5-coder:b
 
 ```
 
@@ -98,62 +92,37 @@ pip install -r requirements.txt
 
 Create a `config.yaml` file in the root directory:
 
-```yaml
-discord_tokens:
-  - 'YOUR_DISCORD_BOT_TOKEN'
-
-git_repos:
-  - '/path/to/your/git/repository'
-
-local_paths:
-  - '/path/to/your/local/codebase'
-
-indexed_extensions:
-  - '.py'
-  - '.go'
-  - '.sql'
-  - '.md'
-  - '.txt'
-  - '.json'
-  - '.cpp'
-  - '.h'
-
-ignored_directories:
-  - '.git'
-  - '__pycache__'
-  - 'node_modules'
-  - '.venv'
-
-sync_interval: 60
-
-ollama:
-  url: 'http://localhost:11434/api/generate'
-  model: 'qwen3.5-coder:b'
-
-chroma_path: './chroma_db'
-sqlite_path: './sitemap.db'
-embedding_model: 'all-MiniLM-L6-v2'
-```
-
 ---
 
-## Usage
+## Launch
 
-1. **Start the application:**
+1. **Start Ollama service** _(if not running in background)_:
+
+```bash
+ollama serve
+
+```
+
+2. **Run the bot:**
 
 ```bash
 python main.py
 
 ```
 
-2. **Available Slash Commands in Discord:**
+On startup, the bot automatically initializes `sitemap.db`, embeds specified local repositories into `chroma_db`, registers slash commands to Discord, and begins background syncing.
+
+---
+
+## Usage
+
+Interact directly in Discord using slash commands:
 
 - `/query ask query:<question>` – Queries local codebase context indexed in ChromaDB.
-- `/query search query:<search_term>` – Fetches live web results via DuckDuckGo and summarizes the findings.
+- `/query search query:<search_term>` – Performs a live DuckDuckGo web search and summarizes findings.
 
 ---
 
 ## License
 
 Distributed under the MIT License. See `LICENSE` for details.
-````
