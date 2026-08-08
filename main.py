@@ -12,8 +12,6 @@ from duckduckgo_search import DDGS
 from bs4 import BeautifulSoup
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-# Load YAML configuration
-
 
 def load_config(path="config.yaml"):
     with open(path, "r", encoding="utf-8") as f:
@@ -25,6 +23,10 @@ config = load_config()
 DISCORD_TOKENS = config.get("discord_tokens", [])
 GIT_REPOS = config.get("git_repos", [])
 LOCAL_PATHS = config.get("local_paths", [])
+INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
+                           ".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h"]))
+IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
+                          ".git", "__pycache__", "node_modules", ".venv"]))
 SYNC_INTERVAL = int(config.get("sync_interval", 60))
 OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/generate")
 OLLAMA_MODEL = config["ollama"].get("model", "qwen2.5-coder:14b")
@@ -32,7 +34,6 @@ CHROMA_PATH = config.get("chroma_path", "./chroma_db")
 SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
 EMBEDDING_MODEL = config.get("embedding_model", "all-MiniLM-L6-v2")
 
-# Database & Vector DB Setup
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = chroma_client.get_or_create_collection(name="codebase")
 embedder = SentenceTransformer(EMBEDDING_MODEL, device="cpu")
@@ -41,8 +42,6 @@ db_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)
 db_conn.execute(
     "CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)"
 )
-
-# Git Auto-Sync Loop
 
 
 async def git_sync_loop():
@@ -60,13 +59,11 @@ async def git_sync_loop():
 
 
 def process_target_path(target_path, splitter, docs, ids, metadatas):
-    """Processes either a single file or traverses a folder."""
     if not os.path.exists(target_path):
         return
 
-    # Helper function to read and split a file
     def parse_file(file_path):
-        if file_path.endswith((".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h")):
+        if file_path.endswith(INDEXED_EXTENSIONS):
             try:
                 with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                     content = f.read()
@@ -81,15 +78,15 @@ def process_target_path(target_path, splitter, docs, ids, metadatas):
     if os.path.isfile(target_path):
         parse_file(target_path)
     elif os.path.isdir(target_path):
-        for root, _, files in os.walk(target_path):
-            if ".git" in root or "__pycache__" in root:
-                continue
+        for root, dirs, files in os.walk(target_path):
+            # Prune ignored directories in-place so os.walk skips descending into them
+            dirs[:] = [d for d in dirs if d not in IGNORED_DIRECTORIES]
+
             for file in files:
                 parse_file(os.path.join(root, file))
 
 
 def reindex_all():
-    """Indexes both git repositories and arbitrary local files/folders."""
     existing = collection.get(where={"source": "local"})
     if existing and existing["ids"]:
         collection.delete(ids=existing["ids"])
@@ -99,11 +96,9 @@ def reindex_all():
     )
     docs, ids, metadatas = [], [], []
 
-    # Process all Git Repositories
     for repo_path in GIT_REPOS:
         process_target_path(repo_path, splitter, docs, ids, metadatas)
 
-    # Process all additional Local Paths
     for path in LOCAL_PATHS:
         process_target_path(path, splitter, docs, ids, metadatas)
 
@@ -153,7 +148,6 @@ async def send_large_message(ctx, text: str):
     for i in range(0, len(text), 1900):
         await ctx.send(text[i:i+1900])
 
-# Discord Bot Setup
 intents = discord.Intents.default()
 intents.message_content = True
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -198,7 +192,6 @@ async def search(ctx, *, query: str):
 
 @bot.event
 async def on_ready():
-    # Initial indexing pass on startup
     reindex_all()
     bot.loop.create_task(git_sync_loop())
 
