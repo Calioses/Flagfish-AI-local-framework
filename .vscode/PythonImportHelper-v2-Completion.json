@@ -1,0 +1,373 @@
+[
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "sqlite3",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sqlite3",
+        "description": "sqlite3",
+        "detail": "sqlite3",
+        "documentation": {}
+    },
+    {
+        "label": "subprocess",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "subprocess",
+        "description": "subprocess",
+        "detail": "subprocess",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "discord",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "discord",
+        "description": "discord",
+        "detail": "discord",
+        "documentation": {}
+    },
+    {
+        "label": "app_commands",
+        "importPath": "discord",
+        "description": "discord",
+        "isExtraImport": true,
+        "detail": "discord",
+        "documentation": {}
+    },
+    {
+        "label": "commands",
+        "importPath": "discord.ext",
+        "description": "discord.ext",
+        "isExtraImport": true,
+        "detail": "discord.ext",
+        "documentation": {}
+    },
+    {
+        "label": "chromadb",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "chromadb",
+        "description": "chromadb",
+        "detail": "chromadb",
+        "documentation": {}
+    },
+    {
+        "label": "SentenceTransformer",
+        "importPath": "sentence_transformers",
+        "description": "sentence_transformers",
+        "isExtraImport": true,
+        "detail": "sentence_transformers",
+        "documentation": {}
+    },
+    {
+        "label": "httpx",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "httpx",
+        "description": "httpx",
+        "detail": "httpx",
+        "documentation": {}
+    },
+    {
+        "label": "yaml",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "yaml",
+        "description": "yaml",
+        "detail": "yaml",
+        "documentation": {}
+    },
+    {
+        "label": "DDGS",
+        "importPath": "duckduckgo_search",
+        "description": "duckduckgo_search",
+        "isExtraImport": true,
+        "detail": "duckduckgo_search",
+        "documentation": {}
+    },
+    {
+        "label": "BeautifulSoup",
+        "importPath": "bs4",
+        "description": "bs4",
+        "isExtraImport": true,
+        "detail": "bs4",
+        "documentation": {}
+    },
+    {
+        "label": "RecursiveCharacterTextSplitter",
+        "importPath": "langchain_text_splitters",
+        "description": "langchain_text_splitters",
+        "isExtraImport": true,
+        "detail": "langchain_text_splitters",
+        "documentation": {}
+    },
+    {
+        "label": "Language",
+        "importPath": "langchain_text_splitters",
+        "description": "langchain_text_splitters",
+        "isExtraImport": true,
+        "detail": "langchain_text_splitters",
+        "documentation": {}
+    },
+    {
+        "label": "QueryGroup",
+        "kind": 6,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "class QueryGroup(app_commands.Group):\n    def __init__(self):\n        super().__init__(name=\"query\", description=\"Query local codebase or web\")\n    @app_commands.command(name=\"ask\", description=\"Query local codebase context\")\n    @app_commands.describe(query=\"Your question about the codebase\")\n    async def ask(self, interaction: discord.Interaction, query: str):\n        await interaction.response.defer(thinking=True)\n        try:\n            query_emb = embedder.encode(query).tolist()\n            results = collection.query(",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "load_config",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def load_config(path=\"config.yaml\"):\n    with open(path, \"r\", encoding=\"utf-8\") as f:\n        return yaml.safe_load(f)\nconfig = load_config()\nDISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_file_hash",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_file_hash(file_path: str) -> str:\n    hasher = hashlib.sha256()\n    with open(file_path, \"rb\") as f:\n        while chunk := f.read(8192):\n            hasher.update(chunk)\n    return hasher.hexdigest()\ndef get_splitter_for_file(file_path: str):\n    ext = os.path.splitext(file_path)[1].lower()\n    if ext in EXTENSION_LANG_MAP:\n        return RecursiveCharacterTextSplitter.from_language(",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "get_splitter_for_file",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def get_splitter_for_file(file_path: str):\n    ext = os.path.splitext(file_path)[1].lower()\n    if ext in EXTENSION_LANG_MAP:\n        return RecursiveCharacterTextSplitter.from_language(\n            language=EXTENSION_LANG_MAP[ext], chunk_size=1000, chunk_overlap=100\n        )\n    return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)\nasync def git_sync_loop():\n    while True:\n        await asyncio.sleep(SYNC_INTERVAL)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "process_target_path",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def process_target_path(target_path, docs, ids, metadatas):\n    if not os.path.exists(target_path):\n        return\n    def parse_file(file_path):\n        if not file_path.endswith(INDEXED_EXTENSIONS):\n            return\n        current_hash = get_file_hash(file_path)\n        cursor = db_conn.cursor()\n        cursor.execute(\n            \"SELECT hash FROM file_hashes WHERE path = ?\", (file_path,))",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "reindex_all",
+        "kind": 2,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "def reindex_all():\n    docs, ids, metadatas = [], [], []\n    for repo_path in GIT_REPOS:\n        process_target_path(repo_path, docs, ids, metadatas)\n    for path in LOCAL_PATHS:\n        process_target_path(path, docs, ids, metadatas)\n    # Batch inserts to avoid ChromaDB batch limits\n    BATCH_SIZE = 500\n    if docs:\n        for i in range(0, len(docs), BATCH_SIZE):",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "config",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "config = load_config()\nDISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "DISCORD_TOKENS",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "DISCORD_TOKENS = config.get(\"discord_tokens\", [])\nGIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "GIT_REPOS",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "GIT_REPOS = config.get(\"git_repos\", [])\nLOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "LOCAL_PATHS",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "LOCAL_PATHS = config.get(\"local_paths\", [])\nINDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "INDEXED_EXTENSIONS",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "INDEXED_EXTENSIONS = tuple(config.get(\"indexed_extensions\", [\n                           \".py\", \".go\", \".sql\", \".md\", \".txt\", \".json\", \".cpp\", \".h\"]))\nIGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "IGNORED_DIRECTORIES",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "IGNORED_DIRECTORIES = set(config.get(\"ignored_directories\", [\n                          \".git\", \"__pycache__\", \"node_modules\", \".venv\"]))\nSYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "SYNC_INTERVAL",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "SYNC_INTERVAL = int(config.get(\"sync_interval\", 60))\nOLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "OLLAMA_URL",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "OLLAMA_URL = config[\"ollama\"].get(\"url\", \"http://localhost:11434/api/generate\")\nOLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "OLLAMA_MODEL",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "OLLAMA_MODEL = config[\"ollama\"].get(\"model\", \"qwen3.5-coder:b\")\nCHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "CHROMA_PATH",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "CHROMA_PATH = config.get(\"chroma_path\", \"./chroma_db\")\nSQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "SQLITE_PATH",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "SQLITE_PATH = config.get(\"sqlite_path\", \"./sitemap.db\")\nEMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "EMBEDDING_MODEL",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "EMBEDDING_MODEL = config.get(\"embedding_model\", \"all-MiniLM-L6-v2\")\nchroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")\ndb_conn.commit()",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "chroma_client",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)\ncollection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")\ndb_conn.commit()\n# Extension to LangChain language mapping",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "collection",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "collection = chroma_client.get_or_create_collection(name=\"codebase\")\nembedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")\ndb_conn.commit()\n# Extension to LangChain language mapping\nEXTENSION_LANG_MAP = {",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "embedder",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "embedder = SentenceTransformer(EMBEDDING_MODEL, device=\"cpu\")\ndb_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")\ndb_conn.commit()\n# Extension to LangChain language mapping\nEXTENSION_LANG_MAP = {\n    \".py\": Language.PYTHON,",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "db_conn",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "db_conn = sqlite3.connect(SQLITE_PATH, check_same_thread=False)\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS visited_urls (url TEXT PRIMARY KEY, title TEXT)\")\ndb_conn.execute(\n    \"CREATE TABLE IF NOT EXISTS file_hashes (path TEXT PRIMARY KEY, hash TEXT)\")\ndb_conn.commit()\n# Extension to LangChain language mapping\nEXTENSION_LANG_MAP = {\n    \".py\": Language.PYTHON,\n    \".go\": Language.GO,",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "EXTENSION_LANG_MAP",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "EXTENSION_LANG_MAP = {\n    \".py\": Language.PYTHON,\n    \".go\": Language.GO,\n    \".cpp\": Language.CPP,\n    \".h\": Language.CPP,\n    \".js\": Language.JS,\n    \".ts\": Language.TS,\n    \".rs\": Language.RUST,\n    \".html\": Language.HTML,\n    \".md\": Language.MARKDOWN,",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "intents",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "intents = discord.Intents.default()\nintents.message_content = True\nbot = commands.Bot(command_prefix=\"!\", intents=intents)\nclass QueryGroup(app_commands.Group):\n    def __init__(self):\n        super().__init__(name=\"query\", description=\"Query local codebase or web\")\n    @app_commands.command(name=\"ask\", description=\"Query local codebase context\")\n    @app_commands.describe(query=\"Your question about the codebase\")\n    async def ask(self, interaction: discord.Interaction, query: str):\n        await interaction.response.defer(thinking=True)",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "intents.message_content",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "intents.message_content = True\nbot = commands.Bot(command_prefix=\"!\", intents=intents)\nclass QueryGroup(app_commands.Group):\n    def __init__(self):\n        super().__init__(name=\"query\", description=\"Query local codebase or web\")\n    @app_commands.command(name=\"ask\", description=\"Query local codebase context\")\n    @app_commands.describe(query=\"Your question about the codebase\")\n    async def ask(self, interaction: discord.Interaction, query: str):\n        await interaction.response.defer(thinking=True)\n        try:",
+        "detail": "main",
+        "documentation": {}
+    },
+    {
+        "label": "bot",
+        "kind": 5,
+        "importPath": "main",
+        "description": "main",
+        "peekOfCode": "bot = commands.Bot(command_prefix=\"!\", intents=intents)\nclass QueryGroup(app_commands.Group):\n    def __init__(self):\n        super().__init__(name=\"query\", description=\"Query local codebase or web\")\n    @app_commands.command(name=\"ask\", description=\"Query local codebase context\")\n    @app_commands.describe(query=\"Your question about the codebase\")\n    async def ask(self, interaction: discord.Interaction, query: str):\n        await interaction.response.defer(thinking=True)\n        try:\n            query_emb = embedder.encode(query).tolist()",
+        "detail": "main",
+        "documentation": {}
+    }
+]

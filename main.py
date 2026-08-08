@@ -31,7 +31,7 @@ IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
                           ".git", "__pycache__", "node_modules", ".venv"]))
 SYNC_INTERVAL = int(config.get("sync_interval", 60))
 OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/generate")
-OLLAMA_MODEL = config["ollama"].get("model", "qwen2.5-coder:14b")
+OLLAMA_MODEL = config["ollama"].get("model", "qwen3.5-coder:b")
 CHROMA_PATH = config.get("chroma_path", "./chroma_db")
 SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
 EMBEDDING_MODEL = config.get("embedding_model", "all-MiniLM-L6-v2")

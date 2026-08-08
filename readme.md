@@ -46,7 +46,7 @@ This project turns your local codebase and web search capabilities into a Discor
 - **Discord Integration:** `discord.py` (Slash Commands via `app_commands`)
 - **Vector Database:** ChromaDB
 - **Relational Database:** SQLite
-- **LLM Engine:** Ollama (`qwen2.5-coder:14b`)
+- **LLM Engine:** Ollama (`qwen3.5-coder:b`)
 - **Embeddings & Text Splitting:** SentenceTransformers, LangChain Text Splitters
 - **Web Scraping & Search:** `duckduckgo-search`, `httpx`, `BeautifulSoup4`
 
@@ -62,7 +62,7 @@ Follow these instructions to run the bot locally on your machine.
 2. **Git**
 3. **Ollama:** Installed and serving models locally (`http://localhost:11434`).
    ```bash
-   ollama pull qwen2.5-coder:14b
+   ollama pull qwen3.5-coder:b
    ```
 
 ````
@@ -128,7 +128,7 @@ sync_interval: 60
 
 ollama:
   url: 'http://localhost:11434/api/generate'
-  model: 'qwen2.5-coder:14b'
+  model: 'qwen3.5-coder:b'
 
 chroma_path: './chroma_db'
 sqlite_path: './sitemap.db'
