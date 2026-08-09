@@ -12,10 +12,10 @@ import chromadb
 import subprocess
 import urllib.request
 
+from ddgs import DDGS
 from bs4 import BeautifulSoup
 from discord import app_commands
 from discord.ext import commands
-from duckduckgo_search import AsyncDDGS
 from sentence_transformers import SentenceTransformer
 from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
 
@@ -288,7 +288,7 @@ def reindex_all():
 
 
 async def search_and_store(query: str) -> str:
-    results = await AsyncDDGS().text(query, max_results=3)
+    results = await DDGS().text(query, max_results=3)
     web_texts = []
 
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -364,9 +364,7 @@ async def send_large_interaction_message(interaction: discord.Interaction, text:
 
 
 intents = discord.Intents.default()
-intents.message_content = True
-bot = commands.Bot(command_prefix="!", intents=intents)
-
+bot = commands.Bot(command_prefix="", intents=intents)
 
 class QueryGroup(app_commands.Group):
     def __init__(self):
