@@ -1,22 +1,66 @@
 import os
-import sqlite3
-import subprocess
+import sys
+import json
+import yaml
+import httpx
+import shutil
+import discord
 import asyncio
 import hashlib
-import discord
+import sqlite3
+import chromadb
+import subprocess
+import urllib.request
+
+from bs4 import BeautifulSoup
 from discord import app_commands
 from discord.ext import commands
-import chromadb
+from duckduckgo_search import AsyncDDGS
 from sentence_transformers import SentenceTransformer
-import httpx
-import yaml
-from duckduckgo_search import DDGS
-from bs4 import BeautifulSoup
-from langchain_text_splitters import RecursiveCharacterTextSplitter, Language
+from langchain_text_splitters import Language, RecursiveCharacterTextSplitter
+
+CONFIG_FILE = "config.yaml"
+REQUIREMENTS_FILE = "requirements.txt"
+
+LOGO = r"""
+
+___________.__                  _____.__       .__     
+\_   _____/|  | _____     _____/ ____\__| _____|  |__  
+ |    __)  |  | \__  \   / ___\   __\|  |/  ___/  |  \ 
+ |     \   |  |__/ __ \_/ /_/  >  |  |  |\___ \|   Y  \
+ \___  /   |____(____  /\___  /|__|  |__/____  >___|  /
+     \/              \//_____/               \/     \/ 
+
+\n
+"""
 
 
-def load_config(path="config.yaml"):
-    with open(path, "r", encoding="utf-8") as f:
+def show_popups():
+    print(LOGO)
+    print("==================================================")
+    print("              APPLICATION LAUNCHER                ")
+    print("==================================================")
+    print("  License: MIT License")
+    print("  Copyright (c) 2026 All Rights Reserved.")
+    print("\n  Press ENTER to accept terms and continue...")
+    print("==================================================")
+    input()
+
+
+def load_config():
+    if not os.path.exists(CONFIG_FILE):
+        print(f"Error: Required configuration file '{CONFIG_FILE}' not found.")
+        sys.exit(1)
+
+    try:
+        import yaml
+    except ImportError:
+        print("Installing PyYAML to read config...")
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "pyyaml"])
+        import yaml
+
+    with open(CONFIG_FILE, "r", encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
@@ -35,6 +79,47 @@ OLLAMA_MODEL = config["ollama"].get("model", "qwen3.5-coder:b")
 CHROMA_PATH = config.get("chroma_path", "./chroma_db")
 SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
 EMBEDDING_MODEL = config.get("embedding_model", "all-MiniLM-L6-v2")
+N_RESULTS = int(config.get("n_results", 8))
+
+
+def install_dependencies(config):
+    if os.path.exists(REQUIREMENTS_FILE):
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "-r", REQUIREMENTS_FILE])
+
+    # 1. Verify chromadb import
+    try:
+        import chromadb
+    except ImportError:
+        subprocess.check_call(
+            [sys.executable, "-m", "pip", "install", "chromadb"])
+
+    # 2. Check Ollama executable
+    if not shutil.which("ollama"):
+        print("Error: 'ollama' command not found. Please install Ollama from https://ollama.com")
+        sys.exit(1)
+
+    # 3. Read model directly from loaded config and pull if missing
+    model_name = config.get("ollama", {}).get("model")
+    if not model_name:
+        print("Error: No 'model' specified under 'ollama' section in config.yaml.")
+        sys.exit(1)
+
+    try:
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=5) as response:
+            data = json.loads(response.read().decode())
+            installed_models = [m.get("name") for m in data.get("models", [])]
+
+        if not any(model_name in m for m in installed_models):
+            print(
+                f"Model '{model_name}' not found locally. Pulling with Ollama...")
+            subprocess.check_call(["ollama", "pull", model_name])
+    except Exception as e:
+        print(f"Error checking/pulling Ollama model: {e}")
+        print("Ensure the Ollama service is running (e.g. 'ollama serve').")
+        sys.exit(1)
+
 
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = chroma_client.get_or_create_collection(name="codebase")
@@ -91,9 +176,9 @@ def get_splitter_for_file(file_path: str):
     ext = os.path.splitext(file_path)[1].lower()
     if ext in EXTENSION_LANG_MAP:
         return RecursiveCharacterTextSplitter.from_language(
-            language=EXTENSION_LANG_MAP[ext], chunk_size=1000, chunk_overlap=100
+            language=EXTENSION_LANG_MAP[ext], chunk_size=1500, chunk_overlap=200
         )
-    return RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=100)
+    return RecursiveCharacterTextSplitter(chunk_size=1500, chunk_overlap=200)
 
 
 async def git_sync_loop():
@@ -183,13 +268,7 @@ def reindex_all():
 
 
 async def search_and_store(query: str) -> str:
-    loop = asyncio.get_running_loop()
-
-    def sync_search():
-        with DDGS() as ddgs:
-            return list(ddgs.text(query, max_results=3))
-
-    results = await loop.run_in_executor(None, sync_search)
+    results = await AsyncDDGS().text(query, max_results=3)
     web_texts = []
 
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -280,7 +359,7 @@ class QueryGroup(app_commands.Group):
         try:
             query_emb = embedder.encode(query).tolist()
             results = collection.query(
-                query_embeddings=[query_emb], n_results=3)
+                query_embeddings=[query_emb], n_results=N_RESULTS)
             context = "\n".join(
                 results["documents"][0]) if results["documents"] and results["documents"][0] else ""
 
@@ -330,5 +409,9 @@ async def on_ready():
     bot.loop.create_task(git_sync_loop())
 
 if __name__ == "__main__":
+    show_popups()
+    config = load_config()
+    install_dependencies()
+
     if DISCORD_TOKENS:
         bot.run(DISCORD_TOKENS[0])
