@@ -32,7 +32,7 @@ ignored_directories:
 
 ollama:
   url: 'http://localhost:11434/api/chat'
-  model: 'qwen3.5-coder:b'
+  model: 'qwen3.5-coder:9b'
 
 discord_tokens:
   - 'YOUR_DISCORD_BOT_TOKEN_1'
