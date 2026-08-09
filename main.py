@@ -287,6 +287,17 @@ def reindex_all():
                            ids=batch_ids, metadatas=batch_meta)
 
 
+async def send_large_interaction_message(interaction: discord.Interaction, text: str):
+    chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)]
+    if not chunks:
+        await interaction.followup.send("No response generated.")
+        return
+
+    await interaction.followup.send(chunks[0])
+    for chunk in chunks[1:]:
+        await interaction.followup.send(chunk)
+
+
 async def search_and_store(query: str) -> str:
     results = await asyncio.to_thread(lambda: list(DDGS().text(query, max_results=3)))
     web_texts = []
@@ -350,17 +361,6 @@ async def query_ollama_with_tools(messages: list, allow_tools: bool = True) -> s
             return await query_ollama_with_tools(messages, allow_tools=False)
 
         return message.get("content", "No response generated.")
-
-
-async def send_large_interaction_message(interaction: discord.Interaction, text: str):
-    chunks = [text[i:i + 1900] for i in range(0, len(text), 1900)]
-    if not chunks:
-        await interaction.followup.send("No response generated.")
-        return
-
-    await interaction.followup.send(chunks[0])
-    for chunk in chunks[1:]:
-        await interaction.followup.send(chunk)
 
 
 intents = discord.Intents.default()
