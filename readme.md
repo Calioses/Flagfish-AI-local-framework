@@ -109,6 +109,63 @@ On startup, the bot automatically initializes `sitemap.db`, embeds specified loc
 
 ---
 
+## Discord Bot Setup Guide
+
+=======================
+
+Step 1
+
+## Create Application in Discord Developer Portal
+
+1.  Navigate to the [Discord Developer Portal](https://discord.com/developers/applications)
+    and log in.
+2.  Click **New Application** in the top-right corner, enter a name, and click **Create**.
+
+Step 2
+
+## Configure Bot & Get Token
+
+1.  Go to the **Bot** tab on the left sidebar.
+2.  Click **Reset Token** (or **Copy**) under the Token section to generate your bot's token. Save this securely—do not share it.
+3.  Scroll down to **Privileged Gateway Intents** and enable **Message Content Intent**.
+4.  Click **Save Changes**.
+
+Step 3
+
+## Generate Bot Invite Link
+
+1.  Go to **OAuth2** > **URL Generator** on the left menu.
+2.  Under **Scopes**, check `bot` and `applications.commands`.
+3.  Under **Bot Permissions**, select:
+    - **Send Messages**
+    - **Read Message History**
+    - **Use Application Commands**
+4.  Copy the generated URL at the bottom of the page.
+
+Step 4
+
+## Invite Bot to Your Server
+
+1.  Paste the copied URL into your browser.
+2.  Select your Discord server from the drop-down list. _(You must have **Manage Server** permission on the target server)_.
+3.  Click **Continue** → **Authorize**.
+
+Step 5
+
+## Update Config and Launch
+
+1.  Open your local `config.yaml` file.
+2.  Add your copied bot token under `discord_tokens`:
+
+        discord_tokens:
+          - "YOUR_BOT_TOKEN_HERE"
+
+3.  Run the Python script:
+
+        python main.py
+
+4.  Once running, type `/query ask` or `/query search` in any text channel where the bot has permission to view.
+
 ## Usage
 
 Interact directly in Discord using slash commands:
