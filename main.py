@@ -288,7 +288,7 @@ def reindex_all():
 
 
 async def search_and_store(query: str) -> str:
-    results = await DDGS().text(query, max_results=3)
+    results = await asyncio.to_thread(lambda: list(DDGS().text(query, max_results=3)))
     web_texts = []
 
     async with httpx.AsyncClient(timeout=10.0) as client:
@@ -365,6 +365,7 @@ async def send_large_interaction_message(interaction: discord.Interaction, text:
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="", intents=intents)
+
 
 class QueryGroup(app_commands.Group):
     def __init__(self):
