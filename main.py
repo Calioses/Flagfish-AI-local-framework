@@ -64,24 +64,6 @@ def load_config():
         return yaml.safe_load(f)
 
 
-config = load_config()
-
-DISCORD_TOKENS = config.get("discord_tokens", [])
-GIT_REPOS = config.get("git_repos", [])
-LOCAL_PATHS = config.get("local_paths", [])
-INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
-                           ".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h"]))
-IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
-                          ".git", "__pycache__", "node_modules", ".venv"]))
-SYNC_INTERVAL = int(config.get("sync_interval", 60))
-OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/chat")
-OLLAMA_MODEL = config["ollama"].get("model", "qwen3.5-coder:b")
-CHROMA_PATH = config.get("chroma_path", "./chroma_db")
-SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
-EMBEDDING_MODEL = config.get("embedding_model", "all-MiniLM-L6-v2")
-N_RESULTS = int(config.get("n_results", 8))
-
-
 def install_dependencies(config):
     if os.path.exists(REQUIREMENTS_FILE):
         subprocess.check_call(
@@ -134,6 +116,30 @@ def install_dependencies(config):
         print(f"Error checking/pulling Ollama model: {e}")
         sys.exit(1)
 
+
+# Setup pre-flight checks before loading heavy vector/embedding modules
+if __name__ == "__main__":
+    show_popups()
+    config = load_config()
+    install_dependencies(config)
+
+
+config = load_config()
+
+DISCORD_TOKENS = config.get("discord_tokens", [])
+GIT_REPOS = config.get("git_repos", [])
+LOCAL_PATHS = config.get("local_paths", [])
+INDEXED_EXTENSIONS = tuple(config.get("indexed_extensions", [
+                           ".py", ".go", ".sql", ".md", ".txt", ".json", ".cpp", ".h"]))
+IGNORED_DIRECTORIES = set(config.get("ignored_directories", [
+                          ".git", "__pycache__", "node_modules", ".venv"]))
+SYNC_INTERVAL = int(config.get("sync_interval", 60))
+OLLAMA_URL = config["ollama"].get("url", "http://localhost:11434/api/chat")
+OLLAMA_MODEL = config["ollama"].get("model", "qwen3.5-coder:b")
+CHROMA_PATH = config.get("chroma_path", "./chroma_db")
+SQLITE_PATH = config.get("sqlite_path", "./sitemap.db")
+EMBEDDING_MODEL = config.get("embedding_model", "all-MiniLM-L6-v2")
+N_RESULTS = int(config.get("n_results", 8))
 
 chroma_client = chromadb.PersistentClient(path=CHROMA_PATH)
 collection = chroma_client.get_or_create_collection(name="codebase")
@@ -422,9 +428,11 @@ async def on_ready():
     await bot.tree.sync()
     bot.loop.create_task(git_sync_loop())
 
-if __name__ == "__main__":
-    show_popups()
-    install_dependencies()
 
+def main():
     if DISCORD_TOKENS:
         bot.run(DISCORD_TOKENS[0])
+
+
+if __name__ == "__main__":
+    main()
