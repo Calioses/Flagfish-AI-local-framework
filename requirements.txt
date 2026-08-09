@@ -3,6 +3,6 @@ chromadb
 sentence-transformers
 httpx
 python-dotenv
-duckduckgo-search
 beautifulsoup4
 langchain-text-splitters
+ddgs
