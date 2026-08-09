@@ -79,14 +79,9 @@ pip install -r requirements.txt
 
 ```
 
-4. **Pull target model in Ollama:**
+4. **Copy the config and adjust to your needs:**
 
-```bash
-ollama pull qwen3.5-coder:b
-
-```
-
----
+5. **Run:**
 
 ## Configuration
 

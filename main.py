@@ -1,7 +1,7 @@
 import os
 import sys
 import json
-import yaml
+import time
 import httpx
 import shutil
 import discord
@@ -99,12 +99,27 @@ def install_dependencies(config):
         print("Error: 'ollama' command not found. Please install Ollama from https://ollama.com")
         sys.exit(1)
 
-    # 3. Read model directly from loaded config and pull if missing
+    # 3. Read model directly from loaded config
     model_name = config.get("ollama", {}).get("model")
     if not model_name:
         print("Error: No 'model' specified under 'ollama' section in config.yaml.")
         sys.exit(1)
 
+    # 4. Check if Ollama server is running; start background process if not
+    try:
+        req = urllib.request.Request("http://localhost:11434/api/tags")
+        with urllib.request.urlopen(req, timeout=2) as response:
+            pass
+    except Exception:
+        print("Ollama service not detected. Starting 'ollama serve' in background...")
+        subprocess.Popen(
+            ["ollama", "serve"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        time.sleep(3)
+
+    # 5. Fetch installed models and pull if missing
     try:
         req = urllib.request.Request("http://localhost:11434/api/tags")
         with urllib.request.urlopen(req, timeout=5) as response:
@@ -117,7 +132,6 @@ def install_dependencies(config):
             subprocess.check_call(["ollama", "pull", model_name])
     except Exception as e:
         print(f"Error checking/pulling Ollama model: {e}")
-        print("Ensure the Ollama service is running (e.g. 'ollama serve').")
         sys.exit(1)
 
 
@@ -410,7 +424,6 @@ async def on_ready():
 
 if __name__ == "__main__":
     show_popups()
-    config = load_config()
     install_dependencies()
 
     if DISCORD_TOKENS:
