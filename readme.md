@@ -121,3 +121,15 @@ Interact directly in Discord using slash commands:
 ## License
 
 Distributed under the MIT License. See `LICENSE` for details.
+
+## Warning ⚠️
+
+This software was built and tested by an idiot.
+
+## 🐐 Credits 🐐
+
+Me
+
+Created by Monkeydew.
+Use, modify, and distribute freely.
+MIT Licensed.
